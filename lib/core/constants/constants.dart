@@ -1,0 +1,1 @@
+const HEADER_HEIGHT = 100.0;
