@@ -10,8 +10,8 @@ class AddArticleModal extends StatelessWidget {
       padding: EdgeInsets.only(right: 16),
       icon: Icon(Icons.add),
       onPressed: () {
-        BlocProvider.of<ArticlesBloc>(context)
-          ..add(AddArticleRequested('Title', 'Some Body Text'));
+        // BlocProvider.of<ArticlesBloc>(context)
+        // ..add(AddArticleRequested('Title', 'Some Body Text'));
       },
     );
   }

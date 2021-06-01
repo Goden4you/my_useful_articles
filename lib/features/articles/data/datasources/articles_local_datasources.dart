@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:selfDevelopment/features/articles/data/model/article_model.dart';
 import 'package:selfDevelopment/features/articles/domain/entities/article.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,7 +10,7 @@ const All_ARTICLES = 'All_ARTICLES';
 
 abstract class ArticlesLocalDataSources {
   Future<List<ArticleModel>> getAllArticles();
-  Future<ArticleModel> addArticle(String title, String body);
+  Future<ArticleModel> addArticle(String title, String body, PickedFile image);
   Future<ArticleModel> removeArticle(Article article);
   Future<ArticleModel> markArticleAsReaded(Article article);
 
@@ -37,12 +38,14 @@ class ArticlesLocalDataSourcesImpl implements ArticlesLocalDataSources {
   }
 
   @override
-  Future<ArticleModel> addArticle(String title, String body) async {
+  Future<ArticleModel> addArticle(
+      String title, String body, PickedFile image) async {
     print('articles length -- ${articles.length}');
     ArticleModel article = ArticleModel(
         id: articles.length,
         title: title,
         body: body,
+        image: image,
         status: ArticleStatus.Unreaded);
     return article;
   }
