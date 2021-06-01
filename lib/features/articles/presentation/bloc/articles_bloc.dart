@@ -36,8 +36,8 @@ class ArticlesBloc extends Bloc<ArticlesEvent, ArticlesState> {
 
     if (event is AddArticleRequested) {
       yield state.copyWith(status: ArticlesStatus.loading);
-      final failureOrArticleAdded =
-          await addArticle(AddArticleParams(event.title, event.body));
+      final failureOrArticleAdded = await addArticle(
+          AddArticleParams(event.title, event.body, event.image));
       yield* _eitherArticleAddedRemovedOrNot(failureOrArticleAdded, false);
     }
 

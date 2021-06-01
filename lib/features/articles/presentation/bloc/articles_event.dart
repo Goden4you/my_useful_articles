@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:selfDevelopment/features/articles/domain/entities/article.dart';
 
 abstract class ArticlesEvent extends Equatable {
@@ -13,10 +14,11 @@ class GetAllArticlesRequested extends ArticlesEvent {}
 class AddArticleRequested extends ArticlesEvent {
   final String title;
   final String body;
+  final PickedFile image;
 
-  AddArticleRequested(this.title, this.body);
+  AddArticleRequested(this.title, this.body, this.image);
   @override
-  List<Object> get props => [title, body];
+  List<Object> get props => [title, body, image];
 }
 
 class RemoveArticleRequested extends ArticlesEvent {

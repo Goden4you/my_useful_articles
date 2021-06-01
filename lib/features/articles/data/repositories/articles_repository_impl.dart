@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:selfDevelopment/core/error/failure.dart';
 import 'package:selfDevelopment/features/articles/data/datasources/articles_local_datasources.dart';
-import 'package:selfDevelopment/features/articles/data/model/article_model.dart';
 import 'package:selfDevelopment/features/articles/domain/entities/article.dart';
 import 'package:selfDevelopment/features/articles/domain/repositories/articles_repository.dart';
 
@@ -23,9 +23,11 @@ class ArticlesRepositoryImpl implements ArticlesRepository {
   }
 
   @override
-  Future<Either<Failure, Article>> addArticle(String title, String body) async {
+  Future<Either<Failure, Article>> addArticle(
+      String title, String body, PickedFile image) async {
     try {
-      final result = await articlesLocalDataSources.addArticle(title, body);
+      final result =
+          await articlesLocalDataSources.addArticle(title, body, image);
 
       return Right(result);
     } catch (e) {

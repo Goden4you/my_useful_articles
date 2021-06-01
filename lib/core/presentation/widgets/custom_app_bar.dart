@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:selfDevelopment/core/constants/constants.dart';
-import 'package:selfDevelopment/features/articles/presentation/widgets/add_article_modal.dart';
+import 'package:selfDevelopment/features/articles/presentation/bloc/articles_bloc.dart';
+import 'package:selfDevelopment/features/articles/presentation/bloc/articles_state.dart';
 
 class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
   CustomAppBar({Key key}) : super(key: key);
@@ -32,15 +34,18 @@ class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
             },
           )
         ],
-        flexibleSpace: Align(
-          alignment: Alignment.bottomLeft,
-          child: Container(
-            padding: EdgeInsets.only(bottom: 10, left: 16),
-            child: Text(
-              'Unreaded articles:',
-              style: TextStyle(fontSize: 22, color: Colors.white),
+        flexibleSpace: BlocBuilder<ArticlesBloc, ArticlesState>(
+            builder: (BuildContext context, state) {
+          return Align(
+            alignment: Alignment.bottomLeft,
+            child: Container(
+              padding: EdgeInsets.only(bottom: 10, left: 16),
+              child: Text(
+                'Unreaded articles: ${state.articles.length}',
+                style: TextStyle(fontSize: 22, color: Colors.white),
+              ),
             ),
-          ),
-        ));
+          );
+        }));
   }
 }
