@@ -8,6 +8,7 @@ import 'package:selfDevelopment/core/utils/take_image.dart';
 import 'package:selfDevelopment/features/articles/domain/entities/article.dart';
 import 'package:selfDevelopment/features/articles/presentation/bloc/articles_bloc.dart';
 import 'package:selfDevelopment/features/articles/presentation/bloc/articles_event.dart';
+import 'package:selfDevelopment/features/articles/presentation/widgets/confirm_delete_modal.dart';
 
 import '../../../../core/utils/string_capitalize.dart';
 
@@ -145,8 +146,8 @@ class _ArticlePageState extends State<ArticlePage> {
                             height: 300,
                             color:
                                 args.article.image != null || newImage != null
-                                    ? Colors.white
-                                    : Colors.transparent,
+                                    ? Colors.transparent
+                                    : Colors.white,
                             child: args.article.image != null ||
                                     newImage != null
                                 ? Image.file(
@@ -266,11 +267,10 @@ class _ArticlePageState extends State<ArticlePage> {
                               width: 165,
                               child: FlatButton(
                                   color: Colors.white,
-                                  onPressed: () {
-                                    context.read<ArticlesBloc>().add(
-                                        RemoveArticleRequested(args.article));
-                                    Navigator.of(context).pop();
-                                  },
+                                  onPressed: () => showDialog(
+                                      context: context,
+                                      builder: (context) => confirmDeleteModal(
+                                          context, args.article)),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.max,
