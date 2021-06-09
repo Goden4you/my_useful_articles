@@ -8,6 +8,11 @@ class CustomThemeData {
         primaryColorDark: Color(0xff663300),
         cardColor: Color(0xffFFFFFF),
         backgroundColor: Color(0xffCCCCCC),
+        snackBarTheme: SnackBarThemeData(
+          actionTextColor: Color(0xff99CCFF),
+          backgroundColor: Color(0xff666666),
+          behavior: SnackBarBehavior.floating,
+        ),
         textTheme: TextTheme(
             headline1: TextStyle(
                 fontWeight: FontWeight.w700,

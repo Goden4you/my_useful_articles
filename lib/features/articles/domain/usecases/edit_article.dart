@@ -5,16 +5,16 @@ import 'package:selfDevelopment/core/usecases/usecase.dart';
 import 'package:selfDevelopment/features/articles/domain/entities/article.dart';
 import 'package:selfDevelopment/features/articles/domain/repositories/articles_repository.dart';
 
-class AddArticle implements UseCase<Article, AddArticleParams> {
+class EditArticle implements UseCase<Article, EditArticleParams> {
   final ArticlesRepository repository;
 
-  AddArticle(
+  EditArticle(
     this.repository,
   );
 
   @override
-  Future<Either<Failure, Article>> call(AddArticleParams params) async {
-    return repository.addArticle(
+  Future<Either<Failure, Article>> call(EditArticleParams params) async {
+    return repository.editArticle(
         id: params.id,
         title: params.title,
         body: params.body,
@@ -24,7 +24,7 @@ class AddArticle implements UseCase<Article, AddArticleParams> {
   }
 }
 
-class AddArticleParams extends Equatable {
+class EditArticleParams extends Equatable {
   final int id;
   final String title;
   final String body;
@@ -32,12 +32,8 @@ class AddArticleParams extends Equatable {
   final String folder;
   final ArticleStatus status;
 
-  AddArticleParams(
-      {this.id, this.title, this.body, this.image, this.folder, this.status})
-      : assert(
-          title != null,
-          body != null,
-        );
+  EditArticleParams(
+      {this.id, this.title, this.body, this.image, this.folder, this.status});
 
   @override
   List<Object> get props => [id, title, body, image, folder, status];

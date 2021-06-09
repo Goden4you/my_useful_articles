@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:selfDevelopment/features/articles/data/model/article_model.dart';
 import 'package:selfDevelopment/features/articles/domain/entities/article.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,13 +9,25 @@ const All_ARTICLES = 'All_ARTICLES';
 
 abstract class ArticlesLocalDataSources {
   Future<List<ArticleModel>> getAllArticles();
-  Future<ArticleModel> addArticle(String title, String body, PickedFile image);
+  Future<ArticleModel> addArticle(
+      {int id,
+      String title,
+      String body,
+      String image,
+      String folder,
+      ArticleStatus status});
   Future<ArticleModel> removeArticle(Article article);
   Future<ArticleModel> markArticleAsReaded(Article article);
+  Future<ArticleModel> markArticleAsUnreaded(Article article);
+  Future<ArticleModel> editArticle(
+      {int id,
+      String title,
+      String body,
+      String image,
+      String folder,
+      ArticleStatus status});
 
   Future<void> updateSharedPrefs(List<Article> articles);
-  Future<void> editArticleTitle(String title, int id);
-  Future<void> editArticleBody(String title, int id);
 }
 
 class ArticlesLocalDataSourcesImpl implements ArticlesLocalDataSources {
@@ -39,14 +50,19 @@ class ArticlesLocalDataSourcesImpl implements ArticlesLocalDataSources {
 
   @override
   Future<ArticleModel> addArticle(
-      String title, String body, PickedFile image) async {
-    print('articles length -- ${articles.length}');
+      {int id,
+      String title,
+      String body,
+      String image,
+      String folder,
+      ArticleStatus status}) async {
     ArticleModel article = ArticleModel(
-        id: articles.length,
+        id: id,
         title: title,
         body: body,
         image: image,
-        status: ArticleStatus.Unreaded);
+        folder: folder,
+        status: status);
     return article;
   }
 
@@ -71,15 +87,44 @@ class ArticlesLocalDataSourcesImpl implements ArticlesLocalDataSources {
         id: article.id,
         title: article.title,
         body: article.body,
+        image: article.image,
+        folder: article.folder,
         status: ArticleStatus.Readed);
-    print('newArticle -- $newArticleToReplace');
 
     return newArticleToReplace;
   }
 
   @override
-  Future<void> editArticleTitle(String title, int id) async {}
+  Future<ArticleModel> markArticleAsUnreaded(
+    Article article,
+  ) async {
+    final newArticleToReplace = ArticleModel(
+        id: article.id,
+        title: article.title,
+        body: article.body,
+        image: article.image,
+        folder: article.folder,
+        status: ArticleStatus.Unreaded);
+
+    return newArticleToReplace;
+  }
 
   @override
-  Future<void> editArticleBody(String body, int id) async {}
+  Future<ArticleModel> editArticle(
+      {int id,
+      String title,
+      String body,
+      String image,
+      String folder,
+      ArticleStatus status}) async {
+    final newArticleToReplace = ArticleModel(
+        id: id,
+        title: title,
+        body: body,
+        image: image,
+        folder: folder,
+        status: status);
+
+    return newArticleToReplace;
+  }
 }

@@ -3,8 +3,10 @@ import 'package:selfDevelopment/features/articles/data/datasources/articles_loca
 import 'package:selfDevelopment/features/articles/data/repositories/articles_repository_impl.dart';
 import 'package:selfDevelopment/features/articles/domain/repositories/articles_repository.dart';
 import 'package:selfDevelopment/features/articles/domain/usecases/add_article.dart';
+import 'package:selfDevelopment/features/articles/domain/usecases/edit_article.dart';
 import 'package:selfDevelopment/features/articles/domain/usecases/get_all_articles.dart';
 import 'package:selfDevelopment/features/articles/domain/usecases/mark_article_as_readed.dart';
+import 'package:selfDevelopment/features/articles/domain/usecases/mark_article_as_unreaded.dart';
 import 'package:selfDevelopment/features/articles/domain/usecases/remove_article.dart';
 import 'package:selfDevelopment/features/articles/presentation/bloc/articles_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,12 +28,16 @@ Future<void> _initArticlesFeature() async {
         getAllArticles: serviceLocator(),
         addArticle: serviceLocator(),
         removeArticle: serviceLocator(),
-        markArticleAsReaded: serviceLocator()))
+        markArticleAsReaded: serviceLocator(),
+        markArticleAsUnreaded: serviceLocator(),
+        editArticle: serviceLocator()))
     // Usecase
     ..registerLazySingleton(() => GetAllArticles(serviceLocator()))
     ..registerLazySingleton(() => AddArticle(serviceLocator()))
     ..registerLazySingleton(() => RemoveArticle(serviceLocator()))
     ..registerLazySingleton(() => MarkArticleAsReaded(serviceLocator()))
+    ..registerLazySingleton(() => MarkArticleAsUnreaded(serviceLocator()))
+    ..registerLazySingleton(() => EditArticle(serviceLocator()))
     // Repository
     ..registerLazySingleton<ArticlesRepository>(() => ArticlesRepositoryImpl(
           articlesLocalDataSources: serviceLocator(),

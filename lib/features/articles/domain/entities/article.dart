@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 enum ArticleStatus { Readed, Unreaded }
 
@@ -8,7 +7,8 @@ class Article extends Equatable {
   final int id;
   final String title;
   final String body;
-  final PickedFile image;
+  final String image;
+  final String folder;
   final ArticleStatus status;
 
   Article(
@@ -16,6 +16,7 @@ class Article extends Equatable {
       @required this.title,
       @required this.body,
       @required this.image,
+      @required this.folder,
       this.status = ArticleStatus.Unreaded});
 
   toJson() {
@@ -23,11 +24,12 @@ class Article extends Equatable {
       "id": this.id,
       "title": this.title,
       "body": this.body,
+      "image": this.image,
+      "folder": this.folder,
       "status": this.status,
-      "image": this.image
     };
   }
 
   @override
-  List<Object> get props => [id, title, body, image, status];
+  List<Object> get props => [id, title, body, image, folder, status];
 }

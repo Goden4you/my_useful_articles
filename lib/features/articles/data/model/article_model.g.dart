@@ -11,6 +11,8 @@ ArticleModel _$ArticleModelFromJson(Map<String, dynamic> json) {
     id: json['id'] as int,
     title: json['title'] as String,
     body: json['body'] as String,
+    image: json['image'] as String,
+    folder: json['folder'] as String,
     status: _$enumDecodeNullable(_$ArticleStatusEnumMap, json['status']),
   );
 }
@@ -20,6 +22,8 @@ Map<String, dynamic> _$ArticleModelToJson(ArticleModel instance) =>
       'id': instance.id,
       'title': instance.title,
       'body': instance.body,
+      'image': instance.image,
+      'folder': instance.folder,
       'status': _$ArticleStatusEnumMap[instance.status],
     };
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:selfDevelopment/core/constants/constants.dart';
+import 'package:selfDevelopment/features/articles/domain/entities/article.dart';
 import 'package:selfDevelopment/features/articles/presentation/bloc/articles_bloc.dart';
 import 'package:selfDevelopment/features/articles/presentation/bloc/articles_state.dart';
 
@@ -41,7 +42,7 @@ class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
             child: Container(
               padding: EdgeInsets.only(bottom: 10, left: 16),
               child: Text(
-                'Unreaded articles: ${state.articles.length}',
+                'Unreaded articles: ${state.articles?.where((article) => article.status == ArticleStatus.Unreaded)?.length ?? ''}',
                 style: TextStyle(fontSize: 22, color: Colors.white),
               ),
             ),
