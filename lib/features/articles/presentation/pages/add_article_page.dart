@@ -76,7 +76,7 @@ class _AddArticlePageState extends State<AddArticlePage>
   @override
   Widget build(BuildContext context) {
     final node = FocusScope.of(context);
-    final bottom = MediaQuery.of(context).viewInsets.bottom;
+    // final bottom = MediaQuery.of(context).viewInsets.bottom;
     return KeyboardVisibilityBuilder(
         builder: (context, isKeyboardVisible) => Scaffold(
               // resizeToAvoidBottomInset: false,
@@ -86,144 +86,133 @@ class _AddArticlePageState extends State<AddArticlePage>
               ),
               body: BlocBuilder<ArticlesBloc, ArticlesState>(
                 builder: (context, state) {
-                  return AnimatedBuilder(
-                    animation: _animation,
-                    child: SingleChildScrollView(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        // height: isKeyboardVisible ? 320 + bottom : 600,
-                        padding: EdgeInsets.all(8),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(50),
-                                child: _image != null
-                                    ? Container(
-                                        width: double.infinity,
-                                        height: 300,
-                                        child: Image.file(
-                                          File(_image),
-                                          fit: BoxFit.fill,
-                                        ))
-                                    : Container(
-                                        decoration: BoxDecoration(
-                                            border: Border.all(width: 1)),
-                                        height: 300,
-                                        child: Center(
-                                          child: IconButton(
-                                              icon: Icon(
-                                                  Icons.add_a_photo_outlined),
-                                              iconSize: 50,
-                                              onPressed: _takeImage),
-                                        ),
+                  return SingleChildScrollView(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      // height: isKeyboardVisible ? 320 + bottom : 700,
+                      padding: EdgeInsets.all(8),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: _image != null
+                                  ? Container(
+                                      width: double.infinity,
+                                      height: 300,
+                                      child: Image.file(
+                                        File(_image),
+                                        fit: BoxFit.fill,
+                                      ))
+                                  : Container(
+                                      decoration: BoxDecoration(
+                                          border: Border.all(width: 1)),
+                                      height: 300,
+                                      child: Center(
+                                        child: IconButton(
+                                            icon: Icon(
+                                                Icons.add_a_photo_outlined),
+                                            iconSize: 50,
+                                            onPressed: _takeImage),
                                       ),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Container(
-                                    width:
-                                        MediaQuery.of(context).size.width / 2 -
-                                            32,
-                                    child: TextFormField(
-                                      controller: _folderController,
-                                      focusNode: _folderFocusNode,
-                                      textCapitalization:
-                                          TextCapitalization.sentences,
-                                      onEditingComplete: () => node.nextFocus(),
-                                      decoration:
-                                          InputDecoration(labelText: 'Folder'),
                                     ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Container(
+                                  width: MediaQuery.of(context).size.width / 2 -
+                                      32,
+                                  child: TextFormField(
+                                    controller: _folderController,
+                                    focusNode: _folderFocusNode,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
+                                    onEditingComplete: () => node.nextFocus(),
+                                    decoration:
+                                        InputDecoration(labelText: 'Folder'),
                                   ),
-                                  Container(
-                                    width:
-                                        MediaQuery.of(context).size.width / 2 -
-                                            32,
-                                    child: DropdownButtonFormField(
-                                      value: selectedStatus,
-                                      items: dropDownStatuses
-                                          .map((label) => DropdownMenuItem(
-                                                child: Text(label),
-                                                value: label,
-                                              ))
-                                          .toList(),
-                                      onSaved: (value) {
-                                        setState(() {
-                                          selectedStatus = value;
-                                        });
-                                      },
-                                      onChanged: (value) {
-                                        setState(() {
-                                          selectedStatus = value;
-                                        });
-                                      },
-                                    ),
-                                  )
-                                ],
-                              ),
-                              TextFormField(
-                                controller: _titleController,
-                                textCapitalization:
-                                    TextCapitalization.sentences,
-                                focusNode: _titleFocusNode,
-                                onEditingComplete: () => node.nextFocus(),
-                                decoration: InputDecoration(labelText: 'Title'),
-                              ),
-                              TextFormField(
-                                controller: _bodyController,
-                                focusNode: _bodyFocusNode,
-                                textCapitalization:
-                                    TextCapitalization.sentences,
-                                onEditingComplete: () => node.unfocus(),
-                                decoration: InputDecoration(
-                                    labelText: selectedStatus == 'Unreaded'
-                                        ? 'Description'
-                                        : 'Notes'),
-                                maxLines: 5,
-                              ),
-                              Container(
-                                padding: EdgeInsets.only(top: 50),
-                                child: FlatButton(
-                                  padding: EdgeInsets.symmetric(vertical: 10),
-                                  color: Theme.of(context).primaryColorDark,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15)),
-                                  onPressed: () {
-                                    node.unfocus();
-                                    BlocProvider.of<ArticlesBloc>(context)
-                                      ..add(AddArticleRequested(
-                                          title: _titleController.text.trim(),
-                                          body: _bodyController.text.trim(),
-                                          image: _image,
-                                          folder: _folderController.text
-                                              .trim()
-                                              .toLowerCase(),
-                                          status: selectedStatus == 'Unreaded'
-                                              ? ArticleStatus.Unreaded
-                                              : ArticleStatus.Readed));
-                                    Navigator.pop(context);
-                                  },
-                                  child: Center(
-                                      child: Text(
-                                    'Add',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 18),
-                                  )),
                                 ),
-                              )
-                            ],
-                          ),
+                                Container(
+                                  width: MediaQuery.of(context).size.width / 2 -
+                                      32,
+                                  child: DropdownButtonFormField(
+                                    value: selectedStatus,
+                                    items: dropDownStatuses
+                                        .map((label) => DropdownMenuItem(
+                                              child: Text(label),
+                                              value: label,
+                                            ))
+                                        .toList(),
+                                    onSaved: (value) {
+                                      setState(() {
+                                        selectedStatus = value;
+                                      });
+                                    },
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedStatus = value;
+                                      });
+                                    },
+                                  ),
+                                )
+                              ],
+                            ),
+                            TextFormField(
+                              controller: _titleController,
+                              textCapitalization: TextCapitalization.sentences,
+                              focusNode: _titleFocusNode,
+                              onEditingComplete: () => node.nextFocus(),
+                              decoration: InputDecoration(labelText: 'Title'),
+                            ),
+                            TextFormField(
+                              controller: _bodyController,
+                              focusNode: _bodyFocusNode,
+                              textCapitalization: TextCapitalization.sentences,
+                              onEditingComplete: () => node.unfocus(),
+                              decoration: InputDecoration(
+                                  labelText: selectedStatus == 'Unreaded'
+                                      ? 'Description'
+                                      : 'Notes'),
+                              maxLines: 5,
+                            ),
+                            Container(
+                              padding: EdgeInsets.only(top: 50),
+                              child: FlatButton(
+                                padding: EdgeInsets.symmetric(vertical: 10),
+                                color: Theme.of(context).primaryColorDark,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15)),
+                                onPressed: () {
+                                  node.unfocus();
+                                  BlocProvider.of<ArticlesBloc>(context)
+                                    ..add(AddArticleRequested(
+                                        title: _titleController.text.trim(),
+                                        body: _bodyController.text.trim(),
+                                        image: _image,
+                                        folder: _folderController.text
+                                            .trim()
+                                            .toLowerCase(),
+                                        status: selectedStatus == 'Unreaded'
+                                            ? ArticleStatus.Unreaded
+                                            : ArticleStatus.Readed));
+                                  Navigator.pop(context);
+                                },
+                                child: Center(
+                                    child: Text(
+                                  'Add',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 18),
+                                )),
+                              ),
+                            )
+                          ],
                         ),
                       ),
                     ),
-                    builder: (BuildContext context, Widget child) {
-                      return child;
-                    },
                   );
                 },
               ),
