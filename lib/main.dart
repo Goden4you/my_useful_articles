@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:selfDevelopment/core/presentation/layouts/main_layout.dart';
-import 'package:selfDevelopment/features/articles/data/datasources/articles_local_datasources.dart';
+import 'package:selfDevelopment/features/articles/config.dart';
 import 'package:selfDevelopment/features/articles/presentation/bloc/articles_bloc.dart';
 import 'package:selfDevelopment/features/articles/presentation/bloc/articles_event.dart';
 import 'package:selfDevelopment/features/articles/presentation/pages/add_article_page.dart';
 import 'package:selfDevelopment/features/articles/presentation/pages/article_page.dart';
 import 'package:selfDevelopment/features/articles/presentation/pages/articles_page.dart';
+import 'package:selfDevelopment/features/search/presentation/bloc/search_bloc.dart';
+import 'package:selfDevelopment/features/search/presentation/bloc/search_event.dart';
 import 'package:selfDevelopment/features/settings/domain/entities/custom_theme_data.dart';
 import 'package:selfDevelopment/injection_container.dart';
 
@@ -32,6 +34,10 @@ class MyUsefulApp extends StatelessWidget {
         BlocProvider<ArticlesBloc>(
           create: (_) =>
               serviceLocator<ArticlesBloc>()..add(GetAllArticlesRequested()),
+        ),
+        BlocProvider<SearchBloc>(
+          create: (_) =>
+              serviceLocator<SearchBloc>()..add(GetAllSearchesRequested()),
         )
       ],
       child: AppView(),
@@ -41,9 +47,6 @@ class MyUsefulApp extends StatelessWidget {
 
 class _AppViewState extends State<AppView> {
   final _navigatorKey = GlobalKey<NavigatorState>();
-
-  ArticlesLocalDataSourcesImpl articles =
-      ArticlesLocalDataSourcesImpl(sharedPreferences: serviceLocator());
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +74,6 @@ class _AppViewState extends State<AppView> {
   @override
   void initState() {
     super.initState();
-    articles.getAllArticles();
+    articlesData.getAllArticles();
   }
 }

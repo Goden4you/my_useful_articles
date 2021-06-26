@@ -129,7 +129,6 @@ class _ArticlePageState extends State<ArticlePage> {
             body: SingleChildScrollView(
               child: Container(
                 padding: EdgeInsets.all(16),
-                color: Theme.of(context).backgroundColor,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -143,36 +142,31 @@ class _ArticlePageState extends State<ArticlePage> {
                           borderRadius: BorderRadius.circular(50),
                           child: Container(
                             width: double.infinity,
-                            height: 300,
-                            color:
+                            height: args.article.image != null ||
+                                    newImage != null ||
+                                    canEdit
+                                ? 300
+                                : 0,
+                            color: Colors.transparent,
+                            child:
                                 args.article.image != null || newImage != null
-                                    ? Colors.transparent
-                                    : Colors.white,
-                            child: args.article.image != null ||
-                                    newImage != null
-                                ? Image.file(
-                                    File(newImage ?? args.article.image),
-                                    fit: BoxFit.fill,
-                                  )
-                                : canEdit
-                                    ? Icon(
-                                        Icons.add_a_photo_outlined,
-                                        size: 50,
+                                    ? Image.file(
+                                        File(newImage ?? args.article.image),
+                                        fit: BoxFit.fill,
                                       )
-                                    : Center(
-                                        child: Text(
-                                        'No image added',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headline1
-                                            .copyWith(
-                                                fontWeight: FontWeight.normal),
-                                      )),
+                                    : canEdit
+                                        ? Icon(
+                                            Icons.add_a_photo_outlined,
+                                            size: 50,
+                                          )
+                                        : Container(),
                           )),
                     ),
                     canEdit
                         ? Container(
-                            margin: EdgeInsets.symmetric(vertical: 16),
+                            margin: EdgeInsets.symmetric(
+                              vertical: 16,
+                            ),
                             child: TextField(
                               decoration: InputDecoration(
                                   hintText: args.article.title,
@@ -187,10 +181,16 @@ class _ArticlePageState extends State<ArticlePage> {
                             ),
                           )
                         : Container(
-                            margin: EdgeInsets.symmetric(vertical: 16),
+                            margin: EdgeInsets.only(
+                                bottom: 16,
+                                top: args.article.image != null ||
+                                        newImage != null
+                                    ? 16
+                                    : 0),
                             child: Center(
                               child: Text(
                                 newTitle ?? args.article.title,
+                                textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.headline1,
                               ),
                             ),

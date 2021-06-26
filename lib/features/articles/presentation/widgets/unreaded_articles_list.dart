@@ -6,16 +6,20 @@ import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:selfDevelopment/core/presentation/widgets/snackbars.dart';
+import 'package:selfDevelopment/core/utils/special_character_handler.dart';
 import 'package:selfDevelopment/features/articles/domain/entities/article.dart';
 import 'package:selfDevelopment/features/articles/presentation/bloc/articles_bloc.dart';
 import 'package:selfDevelopment/features/articles/presentation/bloc/articles_event.dart';
 import 'package:selfDevelopment/features/articles/presentation/pages/article_page.dart';
+import 'package:selfDevelopment/features/search/presentation/bloc/search_bloc.dart';
+import 'package:selfDevelopment/features/search/presentation/bloc/search_state.dart';
 
 const blueColorForSnackBar = const Color(0xff68A0F4);
 
 class UnreadedArticleItem extends StatelessWidget {
   final Article article;
-  UnreadedArticleItem({@required this.article});
+  final List<List<String>> searchFormattedArr;
+  UnreadedArticleItem({@required this.article, this.searchFormattedArr});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -33,7 +37,29 @@ class UnreadedArticleItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text(article.title, style: Theme.of(context).textTheme.headline3),
+              searchFormattedArr == null
+                  ? Text(article.title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline3
+                          .copyWith(height: 1.4))
+                  : RichText(
+                      text: TextSpan(
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline3
+                              .copyWith(height: 1.4),
+                          children: [
+                            ...searchFormattedArr.map((textArr) {
+                              if (textArr.first == 'normal')
+                                return TextSpan(text: textArr.last);
+                              return TextSpan(
+                                  text: textArr.last,
+                                  style: TextStyle(
+                                      backgroundColor: Colors.yellow));
+                            })
+                          ]),
+                    ),
               Text(
                   article.body.length > 30
                       ? '${article.body.substring(0, 30)}...'
@@ -62,341 +88,398 @@ class UnreadedArticlesList extends StatefulWidget {
 }
 
 class _UnreadedArticlesListState extends State<UnreadedArticlesList> {
+  List<List<String>> searchArr = [];
+  List<Article> searchArticles = [];
+
   @override
   Widget build(BuildContext context) {
-    return widget.unreadedArticlesWithImages.length < 3
-        ? ListView.builder(
-            shrinkWrap: true,
-            itemCount: widget.unreadedArticles.length,
-            itemBuilder: (BuildContext context, int index) {
-              final item = widget.unreadedArticles[index];
-              return Dismissible(
-                key: UniqueKey(),
-                background: Container(
-                  color: Color(0xffDDDDDD),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 16),
-                      child: Icon(Icons.mark_email_read_outlined),
-                    ),
-                  ),
-                ),
-                secondaryBackground: Container(
-                  color: Color(0xffCB2B2B),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 16),
-                      child: Icon(
-                        Icons.delete_outlined,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                onDismissed: (direction) {
-                  widget.unreadedArticles.remove(item);
-                  setState(() {});
-                  if (direction == DismissDirection.endToStart) {
-                    Scaffold.of(context).showSnackBar(SnackBar(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25)),
-                      content: Row(
-                        children: [
-                          CircularCountDownTimer(
-                            duration: 6,
-                            initialDuration: 0,
-                            isReverse: true,
-                            isReverseAnimation: true,
-                            fillColor:
-                                Theme.of(context).snackBarTheme.backgroundColor,
-                            ringColor: blueColorForSnackBar,
-                            width: 25,
-                            height: 25,
-                            strokeWidth: 2,
-                            textStyle: Theme.of(context)
-                                .textTheme
-                                .headline2
-                                .copyWith(color: Colors.white),
-                            onComplete: () {
-                              context
-                                  .read<ArticlesBloc>()
-                                  .add(RemoveArticleRequested(item));
-                              Scaffold.of(context).removeCurrentSnackBar();
-                            },
+    return BlocConsumer<SearchBloc, SearchState>(
+        listener: (context, state) {
+          searchArticles = widget.unreadedArticles
+              .where((article) => article.title
+                  .toLowerCase()
+                  .contains(state.currentInput.toLowerCase()))
+              .toList();
+        },
+        listenWhen: (prevState, state) =>
+            prevState.currentInput != state.currentInput,
+        builder: (context, state) {
+          if (state.currentInput.isNotEmpty && searchArticles.length == 0)
+            return Container(
+              height: 50,
+              alignment: Alignment.center,
+              child: Text(
+                'Nothing was founded',
+                style: Theme.of(context).textTheme.headline3,
+              ),
+            );
+          else
+            return widget.unreadedArticlesWithImages.length < 3 ||
+                    state.currentInput.isEmpty
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: searchArticles.isNotEmpty
+                        ? searchArticles.length
+                        : widget.unreadedArticles.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final item = searchArticles.isNotEmpty
+                          ? searchArticles[index]
+                          : widget.unreadedArticles[index];
+                      searchArr = searchSpecialCharacters(
+                          item.title, state.currentInput, null);
+
+                      return Dismissible(
+                        key: UniqueKey(),
+                        background: Container(
+                          color: Color(0xffDDDDDD),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 16),
+                              child: Icon(Icons.mark_email_read_outlined),
+                            ),
                           ),
-                          SizedBox(
-                            width: 8,
+                        ),
+                        secondaryBackground: Container(
+                          color: Color(0xffCB2B2B),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Padding(
+                              padding: EdgeInsets.only(right: 16),
+                              child: Icon(
+                                Icons.delete_outlined,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
-                          Text(
-                            'Article deleted',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headline2
-                                .copyWith(color: Colors.white),
-                          )
-                        ],
-                      ),
-                      action: SnackBarAction(
-                        label: "Undo",
-                        onPressed: () {
-                          Scaffold.of(context).removeCurrentSnackBar();
-                          widget.unreadedArticles.add(item);
+                        ),
+                        onDismissed: (direction) {
+                          widget.unreadedArticles.remove(item);
                           setState(() {});
-                        },
-                      ),
-                      duration: const Duration(
-                          seconds:
-                              10), // tapped more to handle correct removing
-                    ));
-                  } else if (direction == DismissDirection.startToEnd) {
-                    markAsReadSnackBar(context, null, item);
-                  }
-                },
-                child: UnreadedArticleItem(article: item),
-              );
-            })
-        : Column(
-            children: [
-              CarouselSlider(
-                options: CarouselOptions(autoPlay: true, height: 300),
-                items:
-                    widget.unreadedArticlesWithImages.map((articleWithImage) {
-                  final index = widget.unreadedArticlesWithImages
-                      .indexOf(articleWithImage);
-                  return Dismissible(
-                    key: UniqueKey(),
-                    background: Container(
-                      color: Color(0xffDDDDDD),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 16),
-                          child: Icon(Icons.mark_email_read_outlined),
-                        ),
-                      ),
-                    ),
-                    secondaryBackground: Container(
-                      color: Color(0xffCB2B2B),
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: EdgeInsets.only(bottom: 16),
-                          child: Icon(
-                            Icons.delete_outlined,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    direction: DismissDirection.vertical,
-                    onDismissed: (direction) {
-                      widget.unreadedArticlesWithImages.add(articleWithImage);
-                      widget.unreadedArticles.remove(articleWithImage);
-                      setState(() {});
-                      if (direction == DismissDirection.up) {
-                        Scaffold.of(context).showSnackBar(SnackBar(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25)),
-                          content: Row(
-                            children: [
-                              CircularCountDownTimer(
-                                duration: 6,
-                                initialDuration: 0,
-                                isReverse: true,
-                                isReverseAnimation: true,
-                                fillColor: Theme.of(context)
-                                    .snackBarTheme
-                                    .backgroundColor,
-                                ringColor: blueColorForSnackBar,
-                                width: 25,
-                                height: 25,
-                                strokeWidth: 2,
-                                textStyle: Theme.of(context)
-                                    .textTheme
-                                    .headline2
-                                    .copyWith(color: Colors.white),
-                                onComplete: () {
-                                  context.read<ArticlesBloc>().add(
-                                      RemoveArticleRequested(articleWithImage));
+                          if (direction == DismissDirection.endToStart) {
+                            Scaffold.of(context).showSnackBar(SnackBar(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25)),
+                              content: Row(
+                                children: [
+                                  CircularCountDownTimer(
+                                    duration: 6,
+                                    initialDuration: 0,
+                                    isReverse: true,
+                                    isReverseAnimation: true,
+                                    fillColor: Theme.of(context)
+                                        .snackBarTheme
+                                        .backgroundColor,
+                                    ringColor: blueColorForSnackBar,
+                                    width: 25,
+                                    height: 25,
+                                    strokeWidth: 2,
+                                    textStyle: Theme.of(context)
+                                        .textTheme
+                                        .headline2
+                                        .copyWith(color: Colors.white),
+                                    onComplete: () {
+                                      context
+                                          .read<ArticlesBloc>()
+                                          .add(RemoveArticleRequested(item));
+                                      Scaffold.of(context)
+                                          .removeCurrentSnackBar();
+                                    },
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Text(
+                                    'Article deleted',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headline2
+                                        .copyWith(color: Colors.white),
+                                  )
+                                ],
+                              ),
+                              action: SnackBarAction(
+                                label: "Undo",
+                                onPressed: () {
                                   Scaffold.of(context).removeCurrentSnackBar();
+                                  widget.unreadedArticles.add(item);
+                                  setState(() {});
                                 },
                               ),
-                              SizedBox(
-                                width: 8,
+                              duration: const Duration(
+                                  seconds:
+                                      10), // tapped more to handle correct removing
+                            ));
+                          } else if (direction == DismissDirection.startToEnd) {
+                            markAsReadSnackBar(context, null, item);
+                          }
+                        },
+                        child: UnreadedArticleItem(
+                          article: item,
+                          searchFormattedArr: searchArr.length > 1 ||
+                                  searchArr?.first?.first == 'special'
+                              ? searchArr
+                              : null,
+                        ),
+                      );
+                    })
+                : Column(
+                    children: [
+                      CarouselSlider(
+                        options: CarouselOptions(autoPlay: true, height: 300),
+                        items: widget.unreadedArticlesWithImages
+                            .map((articleWithImage) {
+                          final index = widget.unreadedArticlesWithImages
+                              .indexOf(articleWithImage);
+                          return Dismissible(
+                            key: UniqueKey(),
+                            background: Container(
+                              color: Color(0xffDDDDDD),
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: 16),
+                                  child: Icon(Icons.mark_email_read_outlined),
+                                ),
                               ),
-                              Text(
-                                'Article deleted',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headline2
-                                    .copyWith(color: Colors.white),
-                              )
-                            ],
-                          ),
-                          action: SnackBarAction(
-                            label: "Undo",
-                            onPressed: () {
-                              Scaffold.of(context).removeCurrentSnackBar();
+                            ),
+                            secondaryBackground: Container(
+                              color: Color(0xffCB2B2B),
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Padding(
+                                  padding: EdgeInsets.only(bottom: 16),
+                                  child: Icon(
+                                    Icons.delete_outlined,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            direction: DismissDirection.vertical,
+                            onDismissed: (direction) {
                               widget.unreadedArticlesWithImages
                                   .add(articleWithImage);
-                              widget.unreadedArticles.add(articleWithImage);
+                              widget.unreadedArticles.remove(articleWithImage);
                               setState(() {});
-                            },
-                          ),
-                          duration: const Duration(
-                              seconds:
-                                  10), // tapped more to handle correct removing
-                        ));
-                      } else if (direction == DismissDirection.down) {
-                        markAsReadSnackBar(context, null, articleWithImage);
-                      }
-                    },
-                    child: GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, '/article',
-                          arguments: ArticlePageArguments(
-                            article: widget.unreadedArticlesWithImages[index],
-                          )),
-                      child: Container(
-                        margin: EdgeInsets.all(5.0),
-                        child: ClipRRect(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(5.0)),
-                            child: Stack(
-                              children: <Widget>[
-                                Image.file(File(articleWithImage.image),
-                                    fit: BoxFit.cover, width: 1000.0),
-                                Positioned(
-                                  bottom: 0.0,
-                                  left: 0.0,
-                                  right: 0.0,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Color.fromARGB(200, 0, 0, 0),
-                                          Color.fromARGB(0, 0, 0, 0)
-                                        ],
-                                        begin: Alignment.bottomCenter,
-                                        end: Alignment.topCenter,
+                              if (direction == DismissDirection.up) {
+                                Scaffold.of(context).showSnackBar(SnackBar(
+                                  padding: EdgeInsets.symmetric(horizontal: 16),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25)),
+                                  content: Row(
+                                    children: [
+                                      CircularCountDownTimer(
+                                        duration: 6,
+                                        initialDuration: 0,
+                                        isReverse: true,
+                                        isReverseAnimation: true,
+                                        fillColor: Theme.of(context)
+                                            .snackBarTheme
+                                            .backgroundColor,
+                                        ringColor: blueColorForSnackBar,
+                                        width: 25,
+                                        height: 25,
+                                        strokeWidth: 2,
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .headline2
+                                            .copyWith(color: Colors.white),
+                                        onComplete: () {
+                                          context.read<ArticlesBloc>().add(
+                                              RemoveArticleRequested(
+                                                  articleWithImage));
+                                          Scaffold.of(context)
+                                              .removeCurrentSnackBar();
+                                        },
                                       ),
-                                    ),
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 10.0, horizontal: 20.0),
-                                    child: Text(
-                                      '${widget.unreadedArticlesWithImages[index].title}',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headline1
-                                          .copyWith(color: Colors.white),
+                                      SizedBox(
+                                        width: 8,
+                                      ),
+                                      Text(
+                                        'Article deleted',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headline2
+                                            .copyWith(color: Colors.white),
+                                      )
+                                    ],
+                                  ),
+                                  action: SnackBarAction(
+                                    label: "Undo",
+                                    onPressed: () {
+                                      Scaffold.of(context)
+                                          .removeCurrentSnackBar();
+                                      widget.unreadedArticlesWithImages
+                                          .add(articleWithImage);
+                                      widget.unreadedArticles
+                                          .add(articleWithImage);
+                                      setState(() {});
+                                    },
+                                  ),
+                                  duration: const Duration(
+                                      seconds:
+                                          10), // tapped more to handle correct removing
+                                ));
+                              } else if (direction == DismissDirection.down) {
+                                markAsReadSnackBar(
+                                    context, null, articleWithImage);
+                              }
+                            },
+                            child: GestureDetector(
+                              onTap: () =>
+                                  Navigator.pushNamed(context, '/article',
+                                      arguments: ArticlePageArguments(
+                                        article: widget
+                                            .unreadedArticlesWithImages[index],
+                                      )),
+                              child: Container(
+                                margin: EdgeInsets.all(5.0),
+                                child: ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5.0)),
+                                    child: Stack(
+                                      children: <Widget>[
+                                        Image.file(File(articleWithImage.image),
+                                            fit: BoxFit.cover, width: 1000.0),
+                                        Positioned(
+                                          bottom: 0.0,
+                                          left: 0.0,
+                                          right: 0.0,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  Color.fromARGB(200, 0, 0, 0),
+                                                  Color.fromARGB(0, 0, 0, 0)
+                                                ],
+                                                begin: Alignment.bottomCenter,
+                                                end: Alignment.topCenter,
+                                              ),
+                                            ),
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 10.0,
+                                                horizontal: 20.0),
+                                            child: Text(
+                                              '${widget.unreadedArticlesWithImages[index].title}',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headline1
+                                                  .copyWith(
+                                                      color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      ListView.builder(
+                          shrinkWrap: true,
+                          itemCount:
+                              widget.unreadedArticlesWithoutImages.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final item =
+                                widget.unreadedArticlesWithoutImages[index];
+                            return Dismissible(
+                              key: UniqueKey(),
+                              background: Container(
+                                color: Color(0xffDDDDDD),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(left: 16),
+                                    child: Icon(Icons.mark_email_read),
+                                  ),
+                                ),
+                              ),
+                              secondaryBackground: Container(
+                                color: Color(0xffCB2B2B),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(right: 16),
+                                    child: Icon(
+                                      Icons.delete_outlined,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ),
-                              ],
-                            )),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: widget.unreadedArticlesWithoutImages.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final item = widget.unreadedArticlesWithoutImages[index];
-                    return Dismissible(
-                      key: UniqueKey(),
-                      background: Container(
-                        color: Color(0xffDDDDDD),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 16),
-                            child: Icon(Icons.mark_email_read),
-                          ),
-                        ),
-                      ),
-                      secondaryBackground: Container(
-                        color: Color(0xffCB2B2B),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Padding(
-                            padding: EdgeInsets.only(right: 16),
-                            child: Icon(
-                              Icons.delete_outlined,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      onDismissed: (direction) {
-                        widget.unreadedArticlesWithoutImages.remove(item);
-                        setState(() {});
-                        if (direction == DismissDirection.endToStart) {
-                          Scaffold.of(context).showSnackBar(SnackBar(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25)),
-                            content: Row(
-                              children: [
-                                CircularCountDownTimer(
-                                  duration: 6,
-                                  initialDuration: 0,
-                                  isReverse: true,
-                                  isReverseAnimation: true,
-                                  fillColor: Theme.of(context)
-                                      .snackBarTheme
-                                      .backgroundColor,
-                                  ringColor: blueColorForSnackBar,
-                                  width: 25,
-                                  height: 25,
-                                  strokeWidth: 2,
-                                  textStyle: Theme.of(context)
-                                      .textTheme
-                                      .headline2
-                                      .copyWith(color: Colors.white),
-                                  onComplete: () {
-                                    context
-                                        .read<ArticlesBloc>()
-                                        .add(RemoveArticleRequested(item));
-                                    Scaffold.of(context)
-                                        .removeCurrentSnackBar();
-                                  },
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                Text(
-                                  'Article deleted',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headline2
-                                      .copyWith(color: Colors.white),
-                                )
-                              ],
-                            ),
-                            action: SnackBarAction(
-                              label: "Undo",
-                              onPressed: () {
-                                Scaffold.of(context).removeCurrentSnackBar();
-                                widget.unreadedArticles.add(item);
+                              ),
+                              onDismissed: (direction) {
+                                widget.unreadedArticlesWithoutImages
+                                    .remove(item);
                                 setState(() {});
+                                if (direction == DismissDirection.endToStart) {
+                                  Scaffold.of(context).showSnackBar(SnackBar(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 16),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(25)),
+                                    content: Row(
+                                      children: [
+                                        CircularCountDownTimer(
+                                          duration: 6,
+                                          initialDuration: 0,
+                                          isReverse: true,
+                                          isReverseAnimation: true,
+                                          fillColor: Theme.of(context)
+                                              .snackBarTheme
+                                              .backgroundColor,
+                                          ringColor: blueColorForSnackBar,
+                                          width: 25,
+                                          height: 25,
+                                          strokeWidth: 2,
+                                          textStyle: Theme.of(context)
+                                              .textTheme
+                                              .headline2
+                                              .copyWith(color: Colors.white),
+                                          onComplete: () {
+                                            context.read<ArticlesBloc>().add(
+                                                RemoveArticleRequested(item));
+                                            Scaffold.of(context)
+                                                .removeCurrentSnackBar();
+                                          },
+                                        ),
+                                        SizedBox(
+                                          width: 8,
+                                        ),
+                                        Text(
+                                          'Article deleted',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headline2
+                                              .copyWith(color: Colors.white),
+                                        )
+                                      ],
+                                    ),
+                                    action: SnackBarAction(
+                                      label: "Undo",
+                                      onPressed: () {
+                                        Scaffold.of(context)
+                                            .removeCurrentSnackBar();
+                                        widget.unreadedArticles.add(item);
+                                        setState(() {});
+                                      },
+                                    ),
+                                    duration: const Duration(
+                                        seconds:
+                                            10), // tapped more to handle correct removing
+                                  ));
+                                } else if (direction ==
+                                    DismissDirection.startToEnd)
+                                  markAsReadSnackBar(context, null, item);
                               },
-                            ),
-                            duration: const Duration(
-                                seconds:
-                                    10), // tapped more to handle correct removing
-                          ));
-                        } else if (direction == DismissDirection.startToEnd)
-                          markAsReadSnackBar(context, null, item);
-                      },
-                      child: UnreadedArticleItem(article: item),
-                    );
-                  })
-            ],
-          );
+                              child: UnreadedArticleItem(article: item),
+                            );
+                          })
+                    ],
+                  );
+        });
   }
 }

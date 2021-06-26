@@ -7,7 +7,7 @@ class CustomThemeData {
         disabledColor: Color(0xffCCCCCC),
         primaryColorDark: Color(0xff663300),
         cardColor: Color(0xffFFFFFF),
-        backgroundColor: Color(0xffCCCCCC),
+        backgroundColor: Color(0xffCC9966),
         snackBarTheme: SnackBarThemeData(
           actionTextColor: Color(0xff99CCFF),
           backgroundColor: Color(0xff666666),

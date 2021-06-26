@@ -14,7 +14,7 @@ class FormattedText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<List<String>> formattedTextArr =
-        searchSpecialCharacters(text, character);
+        searchSpecialCharacters(text, null, character);
     print('text -- $formattedTextArr');
     return RichText(
       text: TextSpan(children: [

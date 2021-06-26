@@ -6,6 +6,25 @@ import 'package:selfDevelopment/core/constants/constants.dart';
 import 'package:selfDevelopment/features/articles/domain/entities/article.dart';
 import 'package:selfDevelopment/features/articles/presentation/bloc/articles_bloc.dart';
 import 'package:selfDevelopment/features/articles/presentation/bloc/articles_state.dart';
+import 'package:selfDevelopment/features/articles/presentation/pages/add_article_page.dart';
+
+Route _addArticleRoute() {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => AddArticlePage(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      var begin = Offset(1.0, 0.0);
+      var end = Offset.zero;
+
+      var curve = Curves.ease;
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
+}
 
 class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
   CustomAppBar({Key key}) : super(key: key);
@@ -31,7 +50,7 @@ class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
             padding: EdgeInsets.only(right: 16),
             icon: Icon(Icons.add),
             onPressed: () {
-              Navigator.pushNamed(context, '/addArticle');
+              Navigator.of(context).push(_addArticleRoute());
             },
           )
         ],
