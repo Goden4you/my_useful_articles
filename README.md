@@ -1,16 +1,17 @@
-# selfDevelopment
+# MUA(My Useful Articles)
 
-A new Flutter project.
+This is a Flutter project, which can help you to control your articles.
+
+What can you do? This:
+
+* add article with image, title, description/notes;
+* choose article status - readed or unreaded;
+* edit saved article;
+* delete by swiping;
+* mark as readed/unreaded by swiping;
+* search needed article.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1) Copy code
+2) Run "flutter pub get"
